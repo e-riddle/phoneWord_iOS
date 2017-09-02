@@ -2,22 +2,29 @@
 using Foundation;
 using Phoneword_iOS;
 using UIKit;
+using System.Collections.Generic;
 
 namespace mySingleViewIos
 {
     public partial class ViewController : UIViewController
     {
-        protected ViewController(IntPtr handle) : base(handle)
-        {
-            // Note: this .ctor should not contain any initialization logic.
-        }
+		string translatedNumber = "";
+
+		public List<string> PhoneNumbers { get; set; }
+
+		public ViewController(IntPtr handle) : base(handle)
+		{
+			//initialize list of phone numbers called for Call History screen
+			PhoneNumbers = new List<string>();
+
+		}
 
         public override void ViewDidLoad()
         {
             base.ViewDidLoad();
 			// Perform any additional setup after loading the view, typically from a nib.
 
-			string translatedNumber = "";
+			//string translatedNumber = "";
 
 			TranslateButton.TouchUpInside += (object sender, EventArgs e) => {
 				// Convert the phone number with text to a number
@@ -43,6 +50,13 @@ namespace mySingleViewIos
 
 
 			CallButton.TouchUpInside += (object sender, EventArgs e) => {
+
+
+                //Store the phone number that we're dialing in PhoneNumbers
+				PhoneNumbers.Add(translatedNumber);
+
+
+
 				// Use URL handler with tel: prefix to invoke Apple's Phone app...
 				var url = new NSUrl("tel:" + translatedNumber);
 
@@ -64,5 +78,24 @@ namespace mySingleViewIos
             base.DidReceiveMemoryWarning();
             // Release any cached data, images, etc that aren't in use.
         }
+
+
+		public override void PrepareForSegue(UIStoryboardSegue segue, NSObject sender)
+		{
+			base.PrepareForSegue(segue, sender);
+
+			// set the View Controller that’s powering the screen we’re
+			// transitioning to
+
+			var callHistoryContoller = segue.DestinationViewController as CallHistoryController;
+
+			//set the Table View Controller’s list of phone numbers to the
+			// list of dialed phone numbers
+
+			if (callHistoryContoller != null)
+			{
+				callHistoryContoller.PhoneNumbers = PhoneNumbers;
+			}
+		}
     }
 }
